@@ -12,10 +12,11 @@ export async function GET(request: NextRequest) {
 
   try {
     const res = await fetch(
-      `https://rebloom-27190.bubbleapps.io/version-23ez9/api/1.1/wf/verify_iframe?token=${token}`,
+      "https://rebloom-27190.bubbleapps.io/version-23ez9/api/1.1/wf/verify_iframe",
       {
-        method: "GET",
+        method: "POST",
         headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token }),
         cache: "no-store",
       },
     );
