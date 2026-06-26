@@ -1,65 +1,133 @@
-import Image from "next/image";
+import { cookies } from "next/headers";
 
-export default function Home() {
-  return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+type ChatSession = {
+  id?: string;
+  email?: string;
+  name?: string;
+};
+
+function parseSession(value: string): ChatSession | null {
+  try {
+    return JSON.parse(value) as ChatSession;
+  } catch {
+    return null;
+  }
+}
+
+export default async function ChatPage() {
+  const cookieStore = await cookies();
+  const session = cookieStore.get("chat_session");
+
+  if (!session?.value) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-[#f7f4ef] px-6 py-12 text-[#221f1a]">
+        <section className="w-full max-w-md rounded-[2rem] border border-[#ded6c9] bg-white/80 p-8 text-center shadow-[0_24px_80px_rgba(70,54,28,0.12)] backdrop-blur">
+          <p className="text-sm font-medium uppercase tracking-[0.28em] text-[#9b6a3a]">
+            Rebloom Chat
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+          <h1 className="mt-4 text-3xl font-semibold tracking-[-0.04em]">
+            Unauthorized session
+          </h1>
+          <p className="mt-3 text-sm leading-6 text-[#6f665a]">
+            Open this chat from Bubble so we can verify your secure handshake
+            token and start a session.
+          </p>
+        </section>
       </main>
-    </div>
+    );
+  }
+
+  const user = parseSession(session.value);
+
+  if (!user) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-[#f7f4ef] px-6 py-12 text-[#221f1a]">
+        <section className="w-full max-w-md rounded-[2rem] border border-[#ded6c9] bg-white/80 p-8 text-center shadow-[0_24px_80px_rgba(70,54,28,0.12)] backdrop-blur">
+          <p className="text-sm font-medium uppercase tracking-[0.28em] text-[#9b6a3a]">
+            Rebloom Chat
+          </p>
+          <h1 className="mt-4 text-3xl font-semibold tracking-[-0.04em]">
+            Session needs refreshing
+          </h1>
+          <p className="mt-3 text-sm leading-6 text-[#6f665a]">
+            The saved session could not be read. Relaunch the chat from Bubble
+            to create a fresh verified session.
+          </p>
+        </section>
+      </main>
+    );
+  }
+
+  const displayName = user.name || "Rebloom member";
+  const details = [
+    { label: "Bubble user ID", value: user.id },
+    { label: "Email", value: user.email },
+    { label: "Display name", value: user.name },
+  ];
+
+  return (
+    <main className="min-h-screen overflow-hidden bg-[#f7f4ef] px-6 py-10 text-[#221f1a] sm:px-10 lg:px-16">
+      <section className="mx-auto flex min-h-[calc(100vh-5rem)] w-full max-w-5xl items-center">
+        <div className="grid w-full gap-8 rounded-[2.5rem] border border-[#ded6c9] bg-white/75 p-6 shadow-[0_30px_100px_rgba(70,54,28,0.14)] backdrop-blur md:grid-cols-[1.1fr_0.9fr] md:p-10">
+          <div className="flex min-h-[420px] flex-col justify-between rounded-[2rem] bg-[#221f1a] p-8 text-white sm:p-10">
+            <div>
+              <p className="text-sm font-medium uppercase tracking-[0.3em] text-[#d8b98f]">
+                Verified Bubble Handshake
+              </p>
+              <h1 className="mt-8 max-w-xl text-5xl font-semibold tracking-[-0.06em] sm:text-6xl">
+                Welcome back, {displayName}.
+              </h1>
+              <p className="mt-5 max-w-lg text-base leading-7 text-[#d7d0c4]">
+                Your iframe token was verified and the app has stored a secure
+                chat session cookie for this browser.
+              </p>
+            </div>
+
+            <div className="mt-10 flex flex-wrap gap-3 text-sm">
+              <span className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-[#f2eadf]">
+                Session active
+              </span>
+              <span className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-[#f2eadf]">
+                7 day cookie
+              </span>
+              <span className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-[#f2eadf]">
+                HTTP-only
+              </span>
+            </div>
+          </div>
+
+          <aside className="flex flex-col justify-between gap-8 rounded-4xl border border-[#e7dfd2] bg-[#fbf8f2] p-8 sm:p-10">
+            <div>
+              <p className="text-sm font-medium uppercase tracking-[0.28em] text-[#9b6a3a]">
+                Session Reference
+              </p>
+              <h2 className="mt-4 text-3xl font-semibold tracking-[-0.04em]">
+                User context ready for chat
+              </h2>
+              <p className="mt-3 text-sm leading-6 text-[#6f665a]">
+                This is the Bubble payload currently available to server
+                components from the secure cookie.
+              </p>
+            </div>
+
+            <dl className="space-y-4">
+              {details.map((item) => (
+                <div
+                  key={item.label}
+                  className="rounded-2xl border border-[#e2d8c9] bg-white px-5 py-4"
+                >
+                  <dt className="text-xs font-medium uppercase tracking-[0.22em] text-[#9b6a3a]">
+                    {item.label}
+                  </dt>
+                  <dd className="mt-2 warp-break-words font-mono text-sm text-[#2f2a22]">
+                    {item.value || "Not provided"}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </aside>
+        </div>
+      </section>
+    </main>
   );
 }
